@@ -1,19 +1,29 @@
 package guru.springframework.bootstrap;
 
-import guru.springframework.domain.*;
-import guru.springframework.repositories.CategoryRepository;
-import guru.springframework.repositories.RecipeRepository;
-import guru.springframework.repositories.UnitOfMeasureRepository;
-import lombok.extern.slf4j.Slf4j;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import guru.springframework.domain.Category;
+import guru.springframework.domain.Difficulty;
+import guru.springframework.domain.Ingredient;
+import guru.springframework.domain.Notes;
+import guru.springframework.domain.Recipe;
+import guru.springframework.domain.UnitOfMeasure;
+import guru.springframework.repositories.CategoryRepository;
+import guru.springframework.repositories.RecipeRepository;
+import guru.springframework.repositories.UnitOfMeasureRepository;
+import guru.springframework.repositories.reactive.CategoryReactiveRepository;
+import guru.springframework.repositories.reactive.RecipeReactiveRepository;
+import guru.springframework.repositories.reactive.UnitOfMeasureReactiveRepository;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Created by jt on 6/13/17.
@@ -26,6 +36,13 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
     private final RecipeRepository recipeRepository;
     private final UnitOfMeasureRepository unitOfMeasureRepository;
 
+    @Autowired
+    UnitOfMeasureReactiveRepository unitOfMeasureReactiveRepository;
+    @Autowired
+    CategoryReactiveRepository categoryReactiveRepository;
+    @Autowired
+    RecipeReactiveRepository recipeReactiveRepository;
+    
     public RecipeBootstrap(CategoryRepository categoryRepository,
                            RecipeRepository recipeRepository, UnitOfMeasureRepository unitOfMeasureRepository) {
         this.categoryRepository = categoryRepository;
@@ -40,6 +57,12 @@ public class RecipeBootstrap implements ApplicationListener<ContextRefreshedEven
         loadUom();
         recipeRepository.saveAll(getRecipes());
         log.debug("Loading Bootstrap Data");
+        
+        log.error("#######");
+        log.error("Unit Of Measure Count: "+ unitOfMeasureReactiveRepository.count().block().toString());
+        log.error("Category Count: " + categoryReactiveRepository.count().block().toString());
+        log.error("Recipe Count: " + recipeReactiveRepository.count().block().toString());
+        
     }
 
     private void loadCategories(){
